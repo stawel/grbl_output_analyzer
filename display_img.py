@@ -46,7 +46,7 @@ p = sorted(p)
 
 def draw(points, x_off=0,y_off=0, scycle=1, img = None):
     x,y,s,si,xmin,xmax,ymin,ymax,smax=x_off,y_off,0,0,100000,0,100000,0,0
-    for i,tag,d in points:
+    for i,tag,d,_ in points:
         if tag == 'x':
             if not X_dir[i]: x+=1
             else: x-=1
