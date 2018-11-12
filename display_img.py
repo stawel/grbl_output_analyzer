@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import os
 import bitarray
 import argparse
 from bisect import *
@@ -9,6 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--pwm_cycle", help="PWM cycle in samples, default 1024: 1MHz, 1ms cycle", type=int, default=1024)
 parser.add_argument("-f", "--filter", help="filter spikes of size, default 1", type=int, default=1)
 parser.add_argument("-s", "--pwm_simple", help="simple PWM value calculation (faster), default off", action="store_true")
+parser.add_argument("-o", "--output", help='output filename, default "out.png"', default='')
 parser.add_argument('filename', help='filename, default "out.bin"',nargs='?', default="out.bin")
 args = parser.parse_args()
 
@@ -20,7 +22,7 @@ with open(args.filename, 'rb') as fh:
 
 #extract signal from bytestream (edit if necessary)
 _,_,_,out,Y_step,Y_dir,X_step,X_dir = [ b[i::8] for i in range(8)]
-
+#_,_,_,out,Y_dir,Y_step,X_step,X_dir = [ b[i::8] for i in range(8)]
 
 def filter_sig(sig,size):
     def filt2(sig,value, size):
@@ -116,4 +118,9 @@ img = Image.new( 'RGB', (xmax-xmin+1,ymax-ymin+1), (10,10,0)) # create a new bla
 pixels = img.load() # create the pixel map
 draw(p, -xmin,-ymin, args.pwm_cycle, pixels)
 
+output = args.output
+if len(output) == 0:
+    output = os.path.splitext(args.filename)[0] + '.png'
+print 'saving to file:', output
+img.save(output)
 img.show()
