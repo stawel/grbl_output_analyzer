@@ -5,6 +5,7 @@ import os
 import bitarray
 import argparse
 from bisect import *
+import utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--pwm_cycle", help="PWM cycle in samples, default 1024: 1MHz, 1ms cycle", type=int, default=1024)
@@ -24,52 +25,21 @@ with open(args.filename, 'rb') as fh:
 _,_,_,out,Y_step,Y_dir,X_step,X_dir = [ b[i::8] for i in range(8)]
 #_,_,_,out,Y_dir,Y_step,X_step,X_dir = [ b[i::8] for i in range(8)]
 
-def filter_sig(sig,size):
-    def filt2(sig,value, size):
-        v = bitarray.bitarray([value]+[not value]*size+[value])
-        l=sig.search(v)
-        print 'spikes of size:', size, 'found:',l
-        for i in l:
-            for j in range(size):
-                sig[i+j+1]=value
-    if size<=0: return
-    filter_sig(sig, size-1)
-    filt2(sig, True, size)
-    filt2(sig, False, size)
-
-
-def find_pulses(signal, tag):
-    w=[]
-    i=0
-    try:
-        while i < len(signal):
-            x = i = signal.index(True,i)
-            y = i = signal.index(False,i)
-            w.append((x,tag,y-x))
-    except:
-        pass
-    return w
 
 #filter signals (remove spikes of size 2)
 print 'filter signals:'
 for s in [out, Y_step,Y_dir,X_step,X_dir]:
-    filter_sig(s, args.filter)
+    utils.filter_signal(s, args.filter)
 
-xp = find_pulses(X_step, 'x')
-yp = find_pulses(Y_step, 'y')
+xp = utils.find_pulses(X_step, 'x')
+yp = utils.find_pulses(Y_step, 'y')
 p = xp + yp
 
 if args.pwm_simple:
-    sp = find_pulses(out, 's')
-    p += sp
-
+    p += utils.find_pulses(out, 's')
 else:
     print 'calculate PWM output integral'
-    s = 0
-    out_integral = []
-    for v in out:
-        if v: s+=1
-        out_integral.append(s)
+    out_integral = utils.signal_integral(out)
     print 'integral calculation done'
 
 p = sorted(p)
