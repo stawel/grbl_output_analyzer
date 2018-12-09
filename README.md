@@ -23,3 +23,13 @@ $ python display_img.py
 this should display an image of your PWM output (yellow) where eatch pixel is one stepper step (view in full resolution for best result):
 
 ![example output](/example/display_img_output.png)
+
+# Speed visualization
+
+Run:
+```
+$ python display_plot.py -y off example/out.bin
+```
+
+![x_speed_example output](/example/display_plot_x_speed.png)
+
